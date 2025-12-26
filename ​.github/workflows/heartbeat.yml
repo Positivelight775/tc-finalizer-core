@@ -3,6 +3,8 @@ name: Sovereign Heartbeat
 on:
   push:
     branches: [ "main" ]
+  workflow_dispatch:  # This enables the "Manual Run" button
+
 
 jobs:
   verify-anchor:
