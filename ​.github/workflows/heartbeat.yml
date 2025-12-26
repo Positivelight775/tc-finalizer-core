@@ -3,7 +3,7 @@ name: Sovereign Heartbeat
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch:
+  workflow_dispatch:  # <--- THIS IS THE KEY LINE
 
 jobs:
   verify-anchor:
