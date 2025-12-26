@@ -1,27 +1,40 @@
-name: Sovereign Heartbeat
+import hashlib
+import time
+import os
+from google import genai
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+class TCFinalizer:
+    def __init__(self, principal_root):
+        self.identity = principal_root
+        api_key = os.environ.get("GEMINI_API_KEY")
+        self.client = genai.Client(api_key=api_key) if api_key else None
 
-jobs:
-  verify-anchor:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+    def synthesize_and_verify(self, legal_context, market_data):
+        timestamp = time.time()
+        raw_payload = f"{legal_context}|{market_data}|{timestamp}|{self.identity}"
+        final_hash = hashlib.sha384(raw_payload.encode()).hexdigest()
 
-    - name: Install Dependencies
-      run: pip install google-genai
+        analysis = "AI Analysis Skipped: No API Key Found."
+        if self.client:
+            prompt = f"Analyze this State Anchor for Sovereign Compliance: {final_hash}. Context: {legal_context}."
+            response = self.client.models.generate_content(
+                model="gemini-2.0-flash",
+                contents=prompt
+            )
+            analysis = response.text
 
-    - name: Run Truth Anchor with Gemini Logic
-      env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: python finalizer.py
+        return {
+            "anchor": final_hash,
+            "analysis": analysis,
+            "governance": "AURA-PQC-1.1"
+        }
 
+if __name__ == "__main__":
+    finalizer = TCFinalizer("Douglas Edward Davis (PQC-Secured Principal)")
+    result = finalizer.synthesize_and_verify(
+        "Gemini-GitHub-Integration-Genesis", 
+        "Model-2.0-Flash-Activation"
+    )
+    print(f"--- T_C_Finalizer Synthesis Complete ---")
+    print(f"State Anchor: {result['anchor']}")
+    print(f"Sovereign AI Analysis: {result['analysis']}")
